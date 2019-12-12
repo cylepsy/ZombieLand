@@ -1,13 +1,13 @@
 player = {}
-local bullet = require 'bullet'
-local anim8 = require 'anim8'
+local bullet = require "bullet"
+local anim8 = require "anim8"
 -- local walkingImage, walking
 local currentAnim
 local currentImage
 local xoff = -0
 local yoff = -0
 
-local pistolTime = 0.5
+local pistolTime = 0.3
 local bulletTimer = 0
 local canFire = false
 
@@ -27,13 +27,11 @@ function player.load()
 
     -- Load sprite to anim8
     walkingImage = love.graphics.newImage("assets/player_walk_strip6.png")
-    local w = anim8.newGrid(30, 41, walkingImage:getWidth(),
-                            walkingImage:getHeight(), 2, 11, 4)
-    walking = anim8.newAnimation(w('1-6', 1), 0.1)
+    local w = anim8.newGrid(30, 41, walkingImage:getWidth(), walkingImage:getHeight(), 2, 11, 4)
+    walking = anim8.newAnimation(w("1-6", 1), 0.1)
 
     idleImage = love.graphics.newImage("assets/player_9mmhandgun.png")
-    local i = anim8.newGrid(66, 60, idleImage:getWidth(), idleImage:getHeight(),
-                            14, 15)
+    local i = anim8.newGrid(66, 60, idleImage:getWidth(), idleImage:getHeight(), 14, 15)
     idle = anim8.newAnimation(i(1, 1), 1)
 
     currentAnim = idle
@@ -97,8 +95,7 @@ function player.update(dt)
     -- shooting
     if love.keyboard.isDown("space") then
         if canFire then
-            bullet.spawnBullet(player.body:getX(), player.body:getY(), 400,
-                               player.body:getAngle())
+            bullet.spawnBullet(player.body:getX(), player.body:getY(), 1000, player.body:getAngle())
             canFire = false
             bulletTimer = pistolTime
         end
@@ -106,8 +103,12 @@ function player.update(dt)
 end
 
 function player.keyreleased(key)
-    if key == 'd' or 'a' then player.xvel = 0 end
-    if key == 'w' or 's' then player.yvel = 0 end
+    if key == "d" or "a" then
+        player.xvel = 0
+    end
+    if key == "w" or "s" then
+        player.yvel = 0
+    end
 end
 
 function player.draw()
@@ -115,13 +116,19 @@ function player.draw()
     --  drawing the body out
     --	love.graphics.circle("fill", player.body:getX(),player.body:getY(), player.shape:getRadius())
 
-    currentAnim:draw(currentImage, player.body:getX(), player.body:getY(),
-                     player.body:getAngle(), -- scale: 1  offset: 15
-    1, 1, 15, 15)
+    currentAnim:draw(
+        currentImage,
+        player.body:getX(),
+        player.body:getY(),
+        player.body:getAngle(), -- scale: 1  offset: 15
+        1,
+        1,
+        15,
+        15
+    )
     love.graphics.print(tostring(player.xvel))
     love.graphics.print(tostring(player.yvel), 0, 10)
     love.graphics.print(bulletTimer, 0, 20)
-
 end
 
 return player
