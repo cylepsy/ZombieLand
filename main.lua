@@ -1,5 +1,3 @@
-local anim8 = require 'anim8'
-
 local player = require("player")
 
 function love.load()

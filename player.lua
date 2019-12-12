@@ -1,7 +1,5 @@
 player = {}
-bullets = {}
-local bullet = require "bullet"
-
+local bullet = require 'bullet'
 local anim8 = require 'anim8'
 -- local walkingImage, walking
 local currentAnim
@@ -10,6 +8,8 @@ local xoff = -0
 local yoff = -0
 
 function player.load()
+    bullet.load()
+
     player.xvel = 0
     player.yvel = 0
     player.speed = 200
@@ -34,11 +34,10 @@ function player.load()
 
     currentAnim = idle
     currentImage = idleImage
-
-    player.shoot_time = love.timer.getTime()
 end
 
 function player.update(dt)
+    bullet.update(dt)
 
     -- handle input
     if love.keyboard.isDown("d") and player.xvel < player.speed then
@@ -84,24 +83,20 @@ function player.update(dt)
     -- update animation
     currentAnim:update(dt)
 
-    -- shooting
-
-    if love.keyboard.isDown("space") then
-        -- If last show was second ago or more then shoot
-        if math.floor(love.timer.getTime() - player.shoot_time) >= 1 then
-            player.shoot()
-            player.shoot_time = love.timer.getTime()
-        end
-    end
 end
 
 function player.keyreleased(key)
     if key == 'd' or 'a' then player.xvel = 0 end
-
     if key == 'w' or 's' then player.yvel = 0 end
+    -- shooting
+    if key == "space" then
+        bullet.spawnBullet(player.body:getX(), player.body:getY(), 400,
+                           player.body:getAngle())
+    end
 end
 
 function player.draw()
+    bullet.draw()
     --  drawing the body out
     --	love.graphics.circle("fill", player.body:getX(),player.body:getY(), player.shape:getRadius())
 
@@ -111,21 +106,6 @@ function player.draw()
     love.graphics.print(tostring(player.xvel))
     love.graphics.print(tostring(player.yvel), 0, 10)
 
-end
-
-function player.shoot()
-    -- Get point that will be little right and below man's center
-    local x, y = player.body:getWorldPoint(65, 5)
-
-    -- Bullet's direction vector coordinates
-    local lx, ly = player.body:getWorldVector(400, 0)
-
-    -- Index for new bullet in bullets table
-    local i = #bullets + 1
-
-    -- Create bullet
-    bullets[i] = BulletClass:new(x, y, lx, ly)
-    bullets[i]:create()
 end
 
 return player
