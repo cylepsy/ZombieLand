@@ -11,7 +11,7 @@ function bullet.update(dt)
         v.xPos = (v.xPos + v.xSpeed * dt)
         v.yPos = (v.yPos + v.ySpeed * dt)
         v.bBody:setPosition(v.xPos, v.yPos)
-        if v.xPos > love.graphics.getWidth() or v.yPos > love.graphics.getHeight() then
+        if v.xPos > love.graphics.getWidth() or v.yPos > love.graphics.getHeight() or v.xPos < 0 or v.yPos < 0 then
             table.remove(bullets, i)
         end
 

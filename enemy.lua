@@ -1,5 +1,6 @@
 enemy = {}
-local xPos, yPos
+local enemies = {}
+
 local backing = false
 local impact = 1000
 local backDist = 0
@@ -8,76 +9,93 @@ function enemy.load()
 end
 
 function enemy.update(dt)
-    xPos, yPos = enemy.body:getPosition()
-    local currentDist = dt * impact
+    for i, v in ipairs(enemies) do
+        v.xPos, v.yPos = v.body:getPosition()
+        local currentDist = dt * impact
 
-    --  handle gethurt
-    if enemy.fix:getUserData() == "l" then
-        xPos = xPos - currentDist
-        backDist = backDist + currentDist
-    end
-
-    if enemy.fix:getUserData() == "r" then
-        xPos = xPos + currentDist
-        backDist = backDist + currentDist
-    end
-
-    if enemy.fix:getUserData() == "u" then
-        yPos = yPos - currentDist
-        backDist = backDist + currentDist
-    end
-
-    if enemy.fix:getUserData() == "d" then
-        yPos = yPos + currentDist
-        backDist = backDist + currentDist
-    end
-
-    -- Handle backoff
-    if backDist > maxBackDist then
-        enemy.fix:setUserData("enemy")
-        backing = false
-        backDist = 0
-    end
-
-    -- Handle moving
-    if math.floor(enemy.pBody:getX() - xPos) ~= 0 then
-        -- If difference < 0 than player to the left of enemy
-        -- Move enemy to left
-        if (enemy.pBody:getX() - xPos) < 0 then
-            -- Else move enemy to right
-            xPos = xPos - enemy.speed
-        else
-            xPos = xPos + enemy.speed
+        --  handle gethurt
+        if v.fix:getUserData() == "l" then
+            v.xPos = v.xPos - currentDist
+            backDist = backDist + currentDist
         end
-    end
 
-    if math.floor(enemy.pBody:getY() - yPos) ~= 0 then
-        if (enemy.pBody:getY() - yPos) < 0 then
-            yPos = yPos - enemy.speed
-        else
-            yPos = yPos + enemy.speed
+        if v.fix:getUserData() == "r" then
+            v.xPos = v.xPos + currentDist
+            backDist = backDist + currentDist
         end
-    end
 
-    enemy.body:setPosition(xPos, yPos)
+        if v.fix:getUserData() == "u" then
+            v.yPos = v.yPos - currentDist
+            backDist = backDist + currentDist
+        end
+
+        if v.fix:getUserData() == "d" then
+            v.yPos = v.yPos + currentDist
+            backDist = backDist + currentDist
+        end
+
+        -- Handle backoff
+        if backDist > maxBackDist then
+            v.hp = v.hp - 20
+            v.fix:setUserData("enemy")
+            backDist = 0
+        end
+
+        -- Handle Dying
+        if v.hp <= 0 then
+            table.remove(enemies, i)
+        end
+
+        -- Handle moving
+        if math.floor(v.pBody:getX() - v.xPos) ~= 0 then
+            -- If difference < 0 than player to the left of enemy
+            -- Move enemy to left
+            if (v.pBody:getX() - v.xPos) < 0 then
+                -- Else move enemy to right
+                v.xPos = v.xPos - v.speed
+            else
+                v.xPos = v.xPos + v.speed
+            end
+        end
+
+        if math.floor(v.pBody:getY() - v.yPos) ~= 0 then
+            if (v.pBody:getY() - v.yPos) < 0 then
+                v.yPos = v.yPos - v.speed
+            else
+                v.yPos = v.yPos + v.speed
+            end
+        end
+
+        v.body:setPosition(v.xPos, v.yPos)
+    end
 end
 
 function enemy.draw()
-    love.graphics.circle("fill", xPos, yPos, 14)
+    for i, v in ipairs(enemies) do
+        love.graphics.circle("fill", v.xPos, v.yPos, 14)
+        love.graphics.setColor(200, 0, 0)
+        love.graphics.rectangle("fill", v.xPos - 14, v.yPos - 22, 28 * (v.hp / 100), 5)
+        love.graphics.setColor(255, 255, 255)
+    end
 end
 
 function enemy.spawn(x, y, s, pBody)
-    enemy.body = love.physics.newBody(world, x, y, "kinematic")
-    enemy.shape = love.physics.newCircleShape(14)
-    enemy.fix = love.physics.newFixture(enemy.body, enemy.shape, 5)
-    enemy.fix:setUserData("enemy")
-    enemy.pBody = pBody
-
-    enemy.speed = s
-
-    xPos, yPos = enemy.body:getPosition()
+    body = love.physics.newBody(world, x, y, "kinematic")
+    shape = love.physics.newCircleShape(14)
+    fix = love.physics.newFixture(body, shape, 5)
+    fix:setUserData("enemy")
+    xPos, yPos = body:getPosition()
+    e = {
+        body = body,
+        shape = shape,
+        fix = fix,
+        pBody = pBody,
+        speed = s,
+        xPos = xPos,
+        yPos = ypos,
+        hp = 100
+    }
+    table.insert(enemies, e)
 end
 
-function enemy.backoff()
-end
 return enemy
