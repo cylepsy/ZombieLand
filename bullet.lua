@@ -8,6 +8,9 @@ function bullet.update(dt)
     for i, v in ipairs(bullets) do
         v.xPos = (v.xPos + v.xSpeed * dt)
         v.yPos = (v.yPos + v.ySpeed * dt)
+
+        if v.xPos > love.graphics.getWidth() or v.yPos >
+            love.graphics.getHeight() then table.remove(bullets, i) end
     end
 end
 

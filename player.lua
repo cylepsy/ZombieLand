@@ -7,6 +7,10 @@ local currentImage
 local xoff = -0
 local yoff = -0
 
+local pistolTime = 0.5
+local bulletTimer = 0
+local canFire = false
+
 function player.load()
     bullet.load()
 
@@ -83,16 +87,27 @@ function player.update(dt)
     -- update animation
     currentAnim:update(dt)
 
+    -- shooting
+    if bulletTimer > 0 then
+        bulletTimer = bulletTimer - dt
+    else
+        canFire = true
+    end
+
+    -- shooting
+    if love.keyboard.isDown("space") then
+        if canFire then
+            bullet.spawnBullet(player.body:getX(), player.body:getY(), 400,
+                               player.body:getAngle())
+            canFire = false
+            bulletTimer = pistolTime
+        end
+    end
 end
 
 function player.keyreleased(key)
     if key == 'd' or 'a' then player.xvel = 0 end
     if key == 'w' or 's' then player.yvel = 0 end
-    -- shooting
-    if key == "space" then
-        bullet.spawnBullet(player.body:getX(), player.body:getY(), 400,
-                           player.body:getAngle())
-    end
 end
 
 function player.draw()
@@ -105,6 +120,7 @@ function player.draw()
     1, 1, 15, 15)
     love.graphics.print(tostring(player.xvel))
     love.graphics.print(tostring(player.yvel), 0, 10)
+    love.graphics.print(bulletTimer, 0, 20)
 
 end
 
