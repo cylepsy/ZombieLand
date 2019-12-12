@@ -40,7 +40,24 @@ function enemy.update(dt)
     end
 
     -- Handle moving
-    xPos = xPos + enemy.speed
+    if math.floor(enemy.pBody:getX() - xPos) ~= 0 then
+        -- If difference < 0 than player to the left of enemy
+        -- Move enemy to left
+        if (enemy.pBody:getX() - xPos) < 0 then
+            -- Else move enemy to right
+            xPos = xPos - enemy.speed
+        else
+            xPos = xPos + enemy.speed
+        end
+    end
+
+    if math.floor(enemy.pBody:getY() - yPos) ~= 0 then
+        if (enemy.pBody:getY() - yPos) < 0 then
+            yPos = yPos - enemy.speed
+        else
+            yPos = yPos + enemy.speed
+        end
+    end
 
     enemy.body:setPosition(xPos, yPos)
 end
@@ -49,11 +66,12 @@ function enemy.draw()
     love.graphics.circle("fill", xPos, yPos, 14)
 end
 
-function enemy.spawn(x, y, s)
+function enemy.spawn(x, y, s, pBody)
     enemy.body = love.physics.newBody(world, x, y, "kinematic")
     enemy.shape = love.physics.newCircleShape(14)
     enemy.fix = love.physics.newFixture(enemy.body, enemy.shape, 5)
     enemy.fix:setUserData("enemy")
+    enemy.pBody = pBody
 
     enemy.speed = s
 

@@ -10,7 +10,7 @@ function love.load()
 
     player.load()
     enemy.load()
-    enemy.spawn(100, 100, 0.5)
+    enemy.spawn(100, 100, 0.5, player.body)
 end
 
 function love.update(dt)
