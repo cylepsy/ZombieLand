@@ -1,16 +1,24 @@
 enemy = {}
 local enemies = {}
 
+local anim8 = require "anim8"
 local backing = false
 local impact = 1000
 local backDist = 0
 local maxBackDist = 30
 function enemy.load()
+    eWalkingImage = love.graphics.newImage("assets/officer_walk_strip.png")
+    local w = anim8.newGrid(32, 45, eWalkingImage:getWidth(), eWalkingImage:getHeight())
+    eWalking = anim8.newAnimation(w("1-8", 1), 0.4)
 end
 
 function enemy.update(dt)
     for i, v in ipairs(enemies) do
         v.xPos, v.yPos = v.body:getPosition()
+        local direction = math.atan2(v.pBody:getY() - v.body:getY(), v.pBody:getX() - v.body:getX())
+        v.body:setAngle(direction)
+
+        v.eWalking:update(dt)
         local currentDist = dt * impact
 
         --  handle gethurt
@@ -72,28 +80,47 @@ end
 
 function enemy.draw()
     for i, v in ipairs(enemies) do
-        love.graphics.circle("fill", v.xPos, v.yPos, 14)
+        --love.graphics.circle("fill", v.xPos, v.yPos, 14)
+        v.eWalking:draw(eWalkingImage, v.xPos, v.yPos, v.body:getAngle(), 1, 1, 18, 20)
         love.graphics.setColor(200, 0, 0)
         love.graphics.rectangle("fill", v.xPos - 14, v.yPos - 22, 28 * (v.hp / 100), 5)
         love.graphics.setColor(255, 255, 255)
     end
 end
 
-function enemy.spawn(x, y, s, pBody)
+function enemy.spawn(s, pBody)
+    local near_player = true
+    while near_player do
+        -- Random coordinates
+        x = love.math.random(0, love.graphics.getWidth())
+        y = love.math.random(0, love.graphics.getHeight())
+
+        -- Distance between player and zombie by X
+        local dist_x = math.abs(pBody:getX() - x)
+
+        -- Distance between player and zombie by Y
+        local dist_y = math.abs(pBody:getY() - y)
+
+        -- If distance > 100 by X and Y then quit loop
+        if dist_x > 100 and dist_y > 100 then
+            near_player = false
+        end
+    end
+
     body = love.physics.newBody(world, x, y, "kinematic")
     shape = love.physics.newCircleShape(14)
     fix = love.physics.newFixture(body, shape, 5)
     fix:setUserData("enemy")
-    xPos, yPos = body:getPosition()
     e = {
         body = body,
         shape = shape,
         fix = fix,
         pBody = pBody,
         speed = s,
-        xPos = xPos,
-        yPos = ypos,
-        hp = 100
+        xPos = x,
+        yPos = y,
+        hp = 100,
+        eWalking = eWalking
     }
     table.insert(enemies, e)
 end

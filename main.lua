@@ -10,14 +10,18 @@ function love.load()
 
     player.load()
     enemy.load()
-    enemy.spawn(100, 100, 0.5, player.body)
-    enemy.spawn(500, 400, 0.5, player.body)
+    enemy.spawn(0.5, player.body)
+    time = love.timer.getTime()
 end
 
 function love.update(dt)
     world:update(dt)
     player.update(dt)
     enemy.update(dt)
+    if math.floor(love.timer.getTime() - time) >= 5 then
+        enemy.spawn(0.5, player.body)
+        time = love.timer.getTime()
+    end
 end
 
 function love.keyreleased(key)
