@@ -31,30 +31,35 @@ end
 function love.draw()
     player.draw()
     enemy.draw()
-    if ifhit then
-        love.graphics.print("hit", 30, 0)
-    else
-        love.graphics.print("no", 30, 0)
-    end
 end
 
 function beginContact(a, b, coll)
-    love.graphics.print("goal!", 0, 30)
-    local enemy, bullet
+    local eFix, bFix, pFix
 
     if a:getUserData() == "enemy" then
-        enemy = a
+        eFix = a
     elseif b:getUserData() == "enemy" then
-        enemy = b
+        eFix = b
+    end
+
+    if a:getUserData() == "player" then
+        pFix = a
+    elseif b:getUserData() == "player" then
+        pFix = b
     end
 
     if a:getUserData() == "r" or a:getUserData() == "l" or a:getUserData() == "u" or a:getUserData() == "d" then
-        bullet = a
+        bFix = a
     elseif b:getUserData() == "r" or b:getUserData() == "l" or b:getUserData() == "u" or b:getUserData() == "d" then
-        bullet = b
+        bFix = b
     end
-    if bullet and enemy then
-        enemy:setUserData(bullet:getUserData())
-        bullet:setUserData("bang")
+
+    if bFix and eFix then
+        eFix:setUserData(bFix:getUserData())
+        bFix:setUserData("bang")
+    end
+
+    if eFix and pFix then
+        player.hurt()
     end
 end

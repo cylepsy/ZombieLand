@@ -18,11 +18,14 @@ function player.load()
     player.yvel = 0
     player.speed = 200
     player.accel = 400
-    player.face = "right"
+    player.hp = 100
+    player.beingHurt = false
+    player.hurtTime = 0
 
     player.body = love.physics.newBody(world, 60, 60, "kinematic")
     player.shape = love.physics.newCircleShape(14)
     player.fix = love.physics.newFixture(player.body, player.shape, 5)
+    player.fix:setUserData("player")
     player.body:setAngle(0)
 
     -- Load sprite to anim8
@@ -40,6 +43,13 @@ end
 
 function player.update(dt)
     bullet.update(dt)
+
+    -- handling get hurt
+    if player.beingHurt then
+        if math.floor(love.timer.getTime() - player.hurtTime) >= 3 then
+            player.beingHurt = false
+        end
+    end
 
     -- handle input
     if love.keyboard.isDown("d") and player.xvel < player.speed then
@@ -114,8 +124,16 @@ end
 function player.draw()
     bullet.draw()
     --  drawing the body out
-    --	love.graphics.circle("fill", player.body:getX(),player.body:getY(), player.shape:getRadius())
+    -- love.graphics.circle("fill", player.body:getX(), player.body:getY(), player.shape:getRadius())
+    love.graphics.setColor(100, 0, 0)
+    love.graphics.rectangle("fill", 30, 30, 120 * (player.hp / 100), 10)
+    love.graphics.setColor(255, 255, 255)
 
+    if player.beingHurt then
+        love.graphics.setColor(100, 0, 0)
+    else
+        love.graphics.setColor(255, 255, 255)
+    end
     currentAnim:draw(
         currentImage,
         player.body:getX(),
@@ -126,9 +144,25 @@ function player.draw()
         15,
         15
     )
-    love.graphics.print(tostring(player.xvel))
-    love.graphics.print(tostring(player.yvel), 0, 10)
-    love.graphics.print(bulletTimer, 0, 20)
+    love.graphics.setColor(255, 255, 255)
+
+    -- love.graphics.print(tostring(player.xvel))
+    -- love.graphics.print(tostring(player.yvel), 0, 10)
+    -- love.graphics.print(bulletTimer, 0, 20)
+    -- love.graphics.print(player.hp, 0, 30)
+    -- if player.beingHurt then
+    --     love.graphics.print("being hurt", 0, 40)
+    -- else
+    --     love.graphics.print("not being hurt", 0, 40)
+    -- end
+    -- love.graphics.print(math.floor(love.timer.getTime() - player.hurtTime), 0, 50)
 end
 
+function player.hurt()
+    if not player.beingHurt then
+        player.hurtTime = love.timer.getTime()
+        player.hp = player.hp - 10
+        player.beingHurt = true
+    end
+end
 return player
